@@ -1,35 +1,55 @@
 const MOVE_SPEED = 200
+const BULLET_SPEED = 400
+const TIME_LEFT = 40
+const INVADER_SPEED = 100
+let CURRENT_SPEED = INVADER_SPEED
+const LEVEL_DOWN = 100
 
 layer(['obj', 'ui'], 'obj')
 
 addLevel([
-  '!^^^^^^^^^^     &',
-  '!^^^^^^^^^^     &',
-  '!^^^^^^^^^^     &',
-  '!               &',
-  '!               &',
-  '!               &',
-  '!               &',
-  '!               &',
-  '!               &',
-  '!               &',
-  '!               &',
-  '!               &',
-  '!               &',
+
+
+
+  '*********************&',
+  '!^^^^^^^^^^          &',
+  '!^^^^^^^^^^          &',
+  '!^^^^^^^^^^          &',
+  '!                    &',
+  '!                    &',
+  '!                    &',
+  '!                    &',
+  '!                    &',
+  '!                    &',
+  '!                    &',
+  '!                    &',
+  '!                    &',
+  '!                    &',
 ], {
   width: 30,
   height: 22,
+  color: (0, 0, 0),
   '^' : [ sprite('space-invader1'), scale(1.5), 'space-invader1'],
+  '*' : [ sprite('wall'), 'left-wall'],
   '!' : [ sprite('wall'), 'left-wall'],
   '&' : [ sprite('wall'), 'right-wall'],
 })
 
 const player = add([
   sprite('space-ship'),
-  pos(width() / 2, height() / 2),
+  pos(width() / 5, height() / 1.7),
   origin('center')
 ])
 
+collides('player', 'left-wall,', (p, w) => {
+  if (p.pos.x <= w){
+    p.move == 0
+  }
+})
+
+collides('player', 'right-wall', (p, w) => {
+  player.move(0, 0)
+})
 
 keyDown('left', () => {
   player.move(-MOVE_SPEED, 0)
@@ -39,9 +59,39 @@ keyDown('right', () => {
   player.move(MOVE_SPEED, 0)
 })
 
+function spawnBullet(p) {
+  add([
+    rect(6,18), 
+    pos(p), 
+    origin('center'), 
+    color(0.5, 0.5, 1),
+    'bullet'
+    ])
+}
+
+keyPress('space', () => {
+  spawnBullet(player.pos.add(0, -25))
+})
+
+action('bullet', (b) => {
+  b.move(0, -BULLET_SPEED)
+  if (b.pos.y < 0){
+    destroy(b)
+  }
+})
+
+collides('bullet', 'space-invader1', (b, s) => {
+  camShake(4)
+  destroy(b)
+  destroy(s)
+  score.value++
+  score.text = 'Score: ' + score.value
+})
+
 const score = add([
   text('Score: ' + '0'),
-  pos(550, 50),
+  color(1, 0, 0),
+  pos(700, 50),
   layer('ui'),
   scale(3),
   {
@@ -49,30 +99,25 @@ const score = add([
   }
 ])
 
-// const TIME_LEFT = 100
+const timer = add([
+  text('Time Left: ' + '0'),
+  color(1, 0, 0),
+  pos(700,90),
+  scale(2),
+  layer('ui'),
+  {
+    time: TIME_LEFT,
+  },
+])
 
-// const timer = add([
-//   text('Time Left: ' + '0'),
-//   pos(550,90),
-//   scale(2),
-//   layer('ui'),
-//   {
-//     time: TIME_LEFT,
-//   },
-// ])
+timer.action(() => {
+  timer.time -= dt()
+  timer.text = 'Time Left: ' + timer.time.toFixed(0)
 
-// timer.action(() => {
-//   timer.time -= dt()
-//   timer.text = 'Time Left: ' + timer.time.toFixed(0)
-
-//   if (timer.time <= 0){
-//      go('lose', { score: score.value  })
-//   }
-// })
-
-const INVADER_SPEED = 100
-let CURRENT_SPEED = INVADER_SPEED
-const LEVEL_DOWN = 100
+  if (timer.time <= 0){
+     go('lose', { score: score.value  })
+  }
+})
 
 action('space-invader1', (s) => {
   s.move(CURRENT_SPEED, 0)
@@ -99,6 +144,6 @@ player.overlaps('space-invader1', () => {
 action('space-invader1', (s) => {
   if (s.pos.y >= (12 * 22)) {
   //if (s.pos.y >= height() / 2) {
-     go('lose', { score: 'Final Score: ' + '\n' + score.value  })
+     go('lose', { score: score.value  })
   }
 })
