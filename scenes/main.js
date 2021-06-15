@@ -28,11 +28,10 @@ addLevel([
 ], {
   width: 30,
   height: 22,
-  color: (0, 0, 0),
   '^' : [ sprite('space-invader1'), scale(1.5), 'space-invader1'],
   '*' : [ sprite('wall'), 'left-wall'],
-  '!' : [ sprite('wall'), 'left-wall'],
-  '&' : [ sprite('wall'), 'right-wall'],
+  '!' : [ sprite('wall'), 'left-wall', solid()],
+  '&' : [ sprite('wall'), 'right-wall', solid()],
 })
 
 const player = add([
@@ -88,6 +87,14 @@ collides('bullet', 'space-invader1', (b, s) => {
   score.text = 'Score: ' + score.value
 })
 
+const title = add([
+  text('Space Invaders'),
+  color(1,6,0),
+  pos(700,20),
+  layer('ui'),
+  scale(2)
+])
+
 const score = add([
   text('Score: ' + '0'),
   color(1, 0, 0),
@@ -119,6 +126,13 @@ timer.action(() => {
   }
 })
 
+const instructions = add([
+  text('Instructions ' + '\n' + 'Left and Right arrows to move' + '\n' + 'left or right.' + '\n' + 'Spacebar to shoot'),
+  pos(700, 140),
+  color(0,0,1),
+  scale(1)
+])
+
 action('space-invader1', (s) => {
   s.move(CURRENT_SPEED, 0)
 })
@@ -145,5 +159,11 @@ action('space-invader1', (s) => {
   if (s.pos.y >= (12 * 22)) {
   //if (s.pos.y >= height() / 2) {
      go('lose', { score: score.value  })
+  }
+})
+
+action('space-invader1', (s) => {
+  if(s.value <= 0){
+    go('win', { score: score.value })
   }
 })
