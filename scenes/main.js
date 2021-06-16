@@ -8,9 +8,14 @@ const BULLET_SPEED = 400
 layer(['obj', 'ui'], 'obj')
 
 addLevel([
+  '!------------    &',
+  '!------------    &',
   '!^^^^^^^^^^^^    &',
   '!^^^^^^^^^^^^    &',
-  '!^^^^^^^^^^^^    &', 
+  '!++++++++++++    &', 
+  '!++++++++++++    &',
+  '!                &',
+  '!                &',
   '!                &',
   '!                &',
   '!                &',
@@ -21,9 +26,11 @@ addLevel([
   '!                &',
   '!                &',
 ], {
-  width: 30,
+  width: 40,
   height: 22,
-  '^' : [ sprite('space-invader1'), scale(0.7), 'space-invader1'],
+  '^' : [ sprite('space-invader1'), scale(0.7), 'space-invader'],
+  '+' : [ sprite('space-invader2'), scale(0.7), 'space-invader'],
+  '-' : [ sprite('space-invader3'), scale(0.7), 'space-invader'],
   '!' : [ sprite('wall'), 'left-wall'],
   '&' : [ sprite('wall'), 'right-wall'],
 })
@@ -63,26 +70,25 @@ action('bullet', (b) => {
   }
 })
 
-collides('bullet', 'space-invader1', (b,s) => {
+collides('bullet', 'space-invader', (b,s) => {
   camShake(4)
   destroy(b)
   destroy(s)
-  score.value++
-  score.text = 'Score: ' + score.value
+  score.value += 10
+  score.text = 'Score: '  + score.value
 })
 
 const title = add([
-  text('Space' + '\n' + ' Invaders' + '\n' + ' Game'),
-  pos(800, 60),
-  color(1,3,0),
-  origin('center'),
-  scale(3),
-  layer('ui'),
+  text('Space Invaders'),
+  pos(700, 20),
+  color(3,5,0),
+  scale(2),
+  layer('ui')
 ])
 
 const score = add([
   text('Score: ' + '0'),
-  pos(700, 130),
+  pos(700, 70),
   layer('ui'),
   scale(3),
   {
@@ -92,19 +98,21 @@ const score = add([
 
 const timer = add([
   text('0'),
-  pos(700,100),
-  scale(3),
+  pos(700,50),
+  scale(2),
   layer('ui'),
   {
     time: TIME_LEFT,
+    
   },
+  
 ])
 
 const instructions = add([
-  text('Instructions:' + '\n' + 'Left or Right Arrow to Move' + '\n' + 'Spacebar to shoot'),
-  pos(700, 160),
+  text('Instructions: ' + '\n' + 'Left or Right Arrows to move' + '\n' + 'Spacebar to shoot'),
+  pos(700, 100),
+  color(0,1,1),
   scale(1),
-  color(0,3,0),
   layer('ui')
 ])
 
@@ -114,32 +122,33 @@ timer.action(() =>  {
   timer.text = 'Timer: ' + timer.time.toFixed(0)
   if (timer.time <= 0 ) {
     go('lose', { score: score.value })
-  }
+  } 
+  
 })
 
-action('space-invader1', (s) => {
+action('space-invader', (s) => {
   s.move(CURRENT_SPEED, 0)
 })
 
-collides('space-invader1', 'right-wall', () => {
+collides('space-invader', 'right-wall', () => {
   CURRENT_SPEED = -INVADER_SPEED
-  every('space-invader1', (s) => {
+  every('space-invader', (s) => {
     s.move(0, LEVEL_DOWN)
   })
 })
 
-collides('space-invader1', 'left-wall', () => {
+collides('space-invader', 'left-wall', () => {
   CURRENT_SPEED = INVADER_SPEED
-  every('space-invader1', (s) => {
+  every('space-invader', (s) => {
     s.move(0, LEVEL_DOWN)
   })
 })
 
-player.overlaps('space-invader1', () => {
+player.overlaps('space-invader', () => {
   go('lose', { score: score.value })
 })
 
-action('space-invader1', (s) => {
+action('space-invader', (s) => {
   if (s.pos.y >= (12 * 22)) {
   // if (s.pos.y >= height() /2) {
       go('lose', { score: score.value })
